@@ -1,0 +1,29 @@
+{
+  "alias":"potato",
+  "description":"An adventure to test the code with.",
+  "starting_point":{
+    "description":"You awaken by a cavern, unbeknownst why you are here, or how you got here. You are spooked by a roaring sound coming from the cave; as it knocks you over from the shrillness in the roar, you see a sign pointing down a path, where could it lead?",
+    "meta":"This is the very first section of this adventure players will see\n\nOptions:\n:regional_indicator_a::`Travel down the path`(Leads to \"town_1\")\n:regional_indicator_b::`Charge into the tunnel`(Leads to \"cave_1\")",
+    "from":[],
+    "to":{
+      "regional_indicator_a":"town_1",
+      "regional_indicator_b":"cave_1"
+    }
+  },
+  "town_1":{
+    "description":"A town",
+    "meta":"A mysterious town of things. **0_0**",
+    "from":[
+      "starting_point"
+    ],
+    "to":{}
+  },
+  "cave_1":{
+    "description":"A dark cave?",
+    "meta":"A dark cave.",
+    "from":[
+      "starting_point"
+    ],
+    "to":{}
+  }
+}
