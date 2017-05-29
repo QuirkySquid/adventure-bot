@@ -1,13 +1,6 @@
 {
-    "user_id":{
-      "adventure alias":{
-        "region":"",
-        "last_choice":""
-      }
-    },
-    "125793782665969664":{
-      "testing.json":{
-        ""
-      }
-    }
+  "125793782665969664":{
+    "username":"Alkali_Metal#7806",
+    "testing.json":"starting_point"
+  }
 }
