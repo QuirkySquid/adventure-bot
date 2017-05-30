@@ -7,56 +7,67 @@ path_to_json = "adventures/"
 
 
 def json_load():
-    global adventures, filename, database
+    global adventures, filename, database, emojis, loaded_adventure
     with open("user_database.json", "r") as file:
         database = json.load(file)
     for filename in os.listdir("adventures"):
         if filename.endswith(".json"):
             with open(os.path.join(path_to_json, filename), "r") as file:
-                loaded_adventure = json.load(file)
+                loaded_adventure = json.load(file) #pylint: disable=W0612,W0621
 
-def user_commands(client, message):
+def change_position(user, newpos):
+    with open("user_database.json", "r") as file:
+        json_data = json.load(file)
+        json_data[user][filename] = newpos
+
+    with open("user_database.json", "w") as file:
+        file.write(json.dumps(json_data, indent=2))
+        file.close
+
+async def user_commands(client, message):
     if message.content.startswith(config.command_prefix):
         user_info = database[message.author.id][filename]
         command, *args = message.content[1:].split()
         print(command, args)
-        if command.lower == "test":
-            await client.send_message(message.channel, "Test confirmed:tm:")
-        elif command == "adventure":
+        if command.lower() == "test":
+            await sendMessage(message.channel, "Test confirmed:tm:")
+        elif command.lower() == "adventure":
             if database[message.author.id][filename]:
-                bot_msg = await client.send_message(
-                    message.channel,
-                    loaded_adventure[user_info[region]][description])
-                for emoji in loaded_adventure[user_info[region]][to]:
-                    await client.add_reaction(
-                        message=bot_msg, emoji=":"+emoji+":")
-            else:
-                await client.send_message(message.channel,
-                    "OH! It appears as though you are not in the database for\
-                     this adventure yet! Adding you now! (Please run \
-                     `!adventure` again)")
+                bot_msg = await sendMessage(message.channel,
+                                            loaded_adventure[user_info]["description"]) #pylint: disable=E1136,E0602
+            else: #TODO: Automate this
+                sendMessage(message.channel,
+                            "OH! It appears as though you are not in the database for\
+                            this adventure yet! Adding you now! (Please run \
+                            `!adventure` again)")
+#                for key in loaded_adventure[user_info]["to"].keys():                  #pylint: disable=E1136,E0602
+#                    emoji = emojis[key][0:]
+#                    print(emoji)
+#                    await addReaction(bot_msg, emoji)
+        elif command.lower() in loaded_adventure[user_info]["to"].keys():
+            user_info = loaded_adventure[user_info]["to"][command.lower()]
+            change_position(message.author.id, user_info)
+            bot_msg = await sendMessage(message.channel,
+                                        loaded_adventure[user_info]["description"]) #pylint: disable=E1136,E0602
 #            elif command.lower == "lets_wait":
-#  can              msg = await client.send_message(message.channel, "test?")
+#  can              msg = sendMessage("test?")
 #  be              await client.wait_for_reaction(
 #  ignored                  emoji=
 #                    )
 
-def admin_commands(client, message):
+async def admin_commands(client, message):
     command, *args = message.content[1:].split()
     print(command, args)
     if command == "meta":
         if len(args) == 3:
-            await client.send_message(
-                message.channel,
-                filename[args[0]][args[1]][args[2]])
+            sendMessage(message.channel,
+                        filename[args[0]][args[1]][args[2]])
         elif len(args) == 2:
-            await client.send_message(
-                message.channel,
-                filename[args[0]][args[1]])
+            sendMessage(message.channel,
+                        filename[args[0]][args[1]])
         elif len(args) == 1:
-            await client.send_message(
-                message.channel,
-                filename[args[0]])
+            sendMessage(message.channel,
+                        filename[args[0]])
 
 
 
@@ -70,22 +81,27 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    json_load()
     if message.author.id != client.user.id:
-        if message.server.id == "219893635439656961" or :
+        if message.server.id == "219893635439656961":
             if config.command_prefix != ">":
                 if message.content.startswith(config.command_prefix):
-                    user_commands(client, message)
+                    await user_commands(client, message)
                 elif message.content.startswith(">"):
-                    admin_commands(client, message)
+                    await admin_commands(client, message)
             else:
                 if message.content.startswith(config.command_prefix):
-                    user_commands(client, message)
+                    await user_commands(client, message)
                 elif message.content.startswith("%"):
-                    admin_commands(client, message)
+                    await admin_commands(client, message)
         else:
-            user_commands(client, message)
+            await user_commands(client, message)
 
+async def sendMessage(channel, text):
+    return await client.send_message(channel, text)
 
+async def addReaction(message, emoji):
+    await client.add_reaction(message, "")
 
 
 
